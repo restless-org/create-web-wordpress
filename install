@@ -104,7 +104,7 @@ docker run --rm \
     bash -c "
         mkdir ~/.ssh \
         && ssh-keyscan -t ed25519 bitbucket.org github.com >> ~/.ssh/known_hosts \
-        && composer create-project restless/web-wordpress . --prefer-dist --repository='{\"url\": \"git@bitbucket.org:restlessorg/web-wordpress.git\", \"type\": \"vcs\"}' --remove-vcs
+        && composer create-project restless/web-wordpress . --prefer-dist --repository='{\"url\": \"git@github.com:restless-org/web-wordpress.git\", \"type\": \"vcs\"}' --remove-vcs
     "
 
 docker run --rm \
