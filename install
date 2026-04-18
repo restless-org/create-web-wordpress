@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+check_docker() {
+    if ! docker info > /dev/null 2>&1; then
+        echo "Docker is not running." >&2
+        exit 1
+    fi
+}
+
+export_composer_auth() {
+    if [ ! -f ~/.composer/auth.json ]; then
+        echo "~/.composer/auth.json not found. Add your Composer credentials before running this script." >&2
+        exit 1
+    fi
+    export COMPOSER_AUTH="$(cat ~/.composer/auth.json)"
+}
+
+resolve_ssh_auth_sock() {
+    local sock="$SSH_AUTH_SOCK"
+    case "$(uname -sr)" in
+        Darwin*) sock=/run/host-services/ssh-auth.sock ;;
+    esac
+    echo "$sock"
+}
+
+parse_php_and_command() {
+    PHP_VERSION=84
+    COMMAND=
+
+    if [ $# -eq 0 ]; then
+        return
+    fi
+
+    if [[ $1 =~ ^[0-9]+$ ]]; then
+        case "$1" in
+            80|81|82|83|84) PHP_VERSION=$1 ;;
+            *) echo "Unknown PHP version $1." >&2; exit 1 ;;
+        esac
+        shift
+    fi
+
+    COMMAND="$*"
+}
+
+check_docker
+export_composer_auth
+
+parse_php_and_command "$@"
+SSH_AUTH_SOCK_PATH="$(resolve_ssh_auth_sock)"
+PHP_DOT="${PHP_VERSION:0:1}.${PHP_VERSION:1:1}"
+
+docker run --rm \
+    --pull=always \
+    -v "$SSH_AUTH_SOCK_PATH":/ssh-auth.sock \
+    -v "$(pwd)":/var/www/html \
+    -w /var/www/html \
+    -e SSH_AUTH_SOCK=/ssh-auth.sock \
+    -e COMPOSER_AUTH="$COMPOSER_AUTH" \
+    "laravelsail/php${PHP_VERSION}-composer:latest" \
+    bash -c "
+        mkdir ~/.ssh \
+        && ssh-keyscan -t ed25519 bitbucket.org >> ~/.ssh/known_hosts \
+        && composer create-project restless/web-wordpress . --prefer-dist --repository='{\"url\": \"git@bitbucket.org:restlessorg/web-wordpress.git\", \"type\": \"vcs\"}' --remove-vcs
+    "
+
+docker run --rm \
+    --pull=always \
+    -v "$(pwd)":/var/www/html \
+    "wordpress:cli-2-php${PHP_DOT}" \
+    wp unicorn install --php="${PHP_DOT}" --require=vendor/autoload.php
+
+./vendor/bin/unicorn pull
+./vendor/bin/unicorn build
+
+BOLD='\033[1m'
+NC='\033[0m'
+
+echo ""
+if sudo -n true 2>/dev/null; then
+    sudo chown -R "$USER": .
+    echo -e "${BOLD}Get started with:${NC} ./vendor/bin/unicorn up"
+else
+    echo -e "${BOLD}Please provide your password so we can make some final adjustments to your application's permissions.${NC}"
+    echo ""
+    sudo chown -R "$USER": .
+    echo ""
+    echo -e "${BOLD}Thank you! We hope you build something incredible. Dive in with:${NC} ./vendor/bin/unicorn up"
+fi
