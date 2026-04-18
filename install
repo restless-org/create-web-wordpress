@@ -103,7 +103,7 @@ docker run --rm \
     "laravelsail/php${PHP_VERSION}-composer:latest" \
     bash -c "
         mkdir ~/.ssh \
-        && ssh-keyscan -t ed25519 bitbucket.org >> ~/.ssh/known_hosts \
+        && ssh-keyscan -t ed25519 bitbucket.org github.com >> ~/.ssh/known_hosts \
         && composer create-project restless/web-wordpress . --prefer-dist --repository='{\"url\": \"git@bitbucket.org:restlessorg/web-wordpress.git\", \"type\": \"vcs\"}' --remove-vcs
     "
 
