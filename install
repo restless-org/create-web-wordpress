@@ -8,6 +8,50 @@ check_docker() {
 }
 
 export_composer_auth() {
+    # ~/.composer/auth.json must contain credentials for every private VCS host.
+    #
+    # Bitbucket (current):
+    #   Use an OAuth consumer — create one at bitbucket.org → Workspace settings →
+    #   OAuth consumers. Needs Repository read. Account read is not required.
+    #
+    #   {
+    #     "bitbucket-oauth": {
+    #       "bitbucket.org": {
+    #         "consumer-key": "<key>",
+    #         "consumer-secret": "<secret>"
+    #       }
+    #     }
+    #   }
+    #
+    # GitHub (when migrating private repos):
+    #   Use a Personal Access Token (PAT) with the "repo" scope (classic), or a
+    #   fine-grained PAT with Contents: read-only on the relevant repositories.
+    #   Create one at github.com → Settings → Developer settings → Personal access tokens.
+    #
+    #   {
+    #     "github-oauth": {
+    #       "github.com": "<token>"
+    #     }
+    #   }
+    #
+    # ACF Pro:
+    #   The package "wpengine/advanced-custom-fields-pro" is pulled from
+    #   https://connect.advancedcustomfields.com (already declared in composer.json).
+    #   Authenticate with your ACF license key via http-basic — the username is
+    #   the license key and the password is any registered site URL on that license
+    #   (or just the license key again if no URL restriction is set).
+    #   Find your key at advancedcustomfields.com → My Account → Licenses.
+    #
+    #   {
+    #     "http-basic": {
+    #       "connect.advancedcustomfields.com": {
+    #         "username": "<license-key>",
+    #         "password": "https://yourdomain.com"
+    #       }
+    #     }
+    #   }
+    #
+    # All of the above hosts can coexist in the same file.
     if [ ! -f ~/.composer/auth.json ]; then
         echo "~/.composer/auth.json not found. Add your Composer credentials before running this script." >&2
         exit 1
