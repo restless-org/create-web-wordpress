@@ -5,25 +5,44 @@ A bootstrap script that scaffolds the `restless/web-wordpress` Composer project 
 ## Prerequisites
 
 - **Docker** — running before you execute the script
-- **SSH key** loaded in your SSH agent (`ssh-add`) for GitHub access
 - **`~/.composer/auth.json`** — Composer credentials file (see below)
 
 ## Composer credentials
 
-Create `~/.composer/auth.json` with credentials for every private host the project uses. All entries can coexist in the same file:
+Create `~/.composer/auth.json` with credentials for every private host the project uses. All entries can coexist in the same file.
+
+### GitHub OAuth Token
+
+Private `restless` packages are hosted on GitHub. Composer uses a GitHub OAuth token to authenticate and download them as zip archives via the GitHub API.
+
+1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**
+2. Generate a new token with the **`repo`** scope only
+3. Add it to `~/.composer/auth.json`:
+
+```json
+{
+  "github-oauth": {
+    "github.com": "YOUR_GITHUB_TOKEN"
+  }
+}
+```
+
+### Advanced Custom Fields PRO
+
+ACF PRO requires http-basic credentials in `~/.composer/auth.json`. The password can be any site URL active on the license. Use `http://localhost` for development.
+
+- [Installing ACF PRO with Composer](https://www.advancedcustomfields.com/resources/installing-acf-pro-with-composer/)
 
 ```json
 {
   "http-basic": {
     "connect.advancedcustomfields.com": {
-      "username": "<acf-license-key>",
-      "password": "https://yourdomain.com"
+      "username": "${ACF_PRO_KEY}",
+      "password": "http://localhost"
     }
   }
 }
 ```
-
-**ACF Pro** — find your license key at advancedcustomfields.com › My Account › Licenses. Use the key as both username and password if no URL restriction is set, otherwise use a registered site URL as the password.
 
 ## Usage
 
