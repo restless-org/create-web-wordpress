@@ -5,7 +5,7 @@ A bootstrap script that scaffolds the `restless/web-wordpress` Composer project 
 ## Prerequisites
 
 - **Docker** — running before you execute the script
-- **SSH key** loaded in your SSH agent (`ssh-add`) for Bitbucket/GitHub access
+- **SSH key** loaded in your SSH agent (`ssh-add`) for GitHub access
 - **`~/.composer/auth.json`** — Composer credentials file (see below)
 
 ## Composer credentials
@@ -14,15 +14,6 @@ Create `~/.composer/auth.json` with credentials for every private host the proje
 
 ```json
 {
-  "bitbucket-oauth": {
-    "bitbucket.org": {
-      "consumer-key": "<key>",
-      "consumer-secret": "<secret>"
-    }
-  },
-  "github-oauth": {
-    "github.com": "<personal-access-token>"
-  },
   "http-basic": {
     "connect.advancedcustomfields.com": {
       "username": "<acf-license-key>",
@@ -31,10 +22,6 @@ Create `~/.composer/auth.json` with credentials for every private host the proje
   }
 }
 ```
-
-**Bitbucket OAuth consumer** — create one at Bitbucket › Workspace settings › OAuth consumers. Needs *Repository: read* permission.
-
-**GitHub PAT** — create at GitHub › Settings › Developer settings › Personal access tokens. Needs `repo` scope (classic) or *Contents: read-only* (fine-grained).
 
 **ACF Pro** — find your license key at advancedcustomfields.com › My Account › Licenses. Use the key as both username and password if no URL restriction is set, otherwise use a registered site URL as the password.
 
